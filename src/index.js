@@ -149,6 +149,8 @@ export Sidebar from './modules/Sidebar'
 export SidebarPushable from './modules/Sidebar/SidebarPushable'
 export SidebarPusher from './modules/Sidebar/SidebarPusher'
 
+export Slider from './modules/Slider'
+
 export Sticky from './modules/Sticky'
 
 export Tab from './modules/Tab'
