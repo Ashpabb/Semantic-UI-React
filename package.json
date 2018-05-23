@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "docs": "gulp docs",
+    "prepare": "rimraf dist/es",
     "build": "yarn build:commonjs && yarn build:es && yarn build:umd && yarn build:docs",
     "prebuild:commonjs": "rimraf dist/commonjs",
     "build:commonjs": "cross-env NODE_ENV=build babel src -d dist/commonjs && yarn tsd",
