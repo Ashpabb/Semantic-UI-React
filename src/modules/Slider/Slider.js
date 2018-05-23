@@ -4,8 +4,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { DraggableCore } from 'react-draggable'
 
-// import './slider.css'
-
 import {
   AutoControlledComponent as Component,
   createHTMLLabel,
@@ -27,15 +25,14 @@ const _meta = {
 const debug = makeDebugger('slider')
 
 /**
- * Utility Functions
- */
-
-/**
  * Class Name Constants
  */
 const UPPER_BOUND = 'upperBound'
 const LOWER_BOUND = 'lowerBound'
 
+/**
+ * Utility Functions
+ */
 /** from mdn => /JavaScript/Reference/Global_Objects/Math/round#A_better_solution */
 function precisionRound(number, precision) {
   const shift = (num, exponent) => {
@@ -140,8 +137,8 @@ export default class Slider extends Component {
     min: 0,
     max: 20,
     step: 1,
-    start: 0,
-    doubleStart: 1,
+    start: 1,
+    doubleStart: 0,
     smooth: false,
     precision: 1,
   }
@@ -152,6 +149,15 @@ export default class Slider extends Component {
 
   static _meta = _meta
 
+  constructor(props) {
+    super(props)
+    const { start, doubleStart } = this.props
+    this.state = {
+      lowerVal: doubleStart,
+      upperVal: start,
+    }
+  }
+
   onStart = () => {
     const { upperVal, lowerVal } = this.state
     debug('startDrag')
@@ -161,11 +167,19 @@ export default class Slider extends Component {
     })
   }
 
+  handleChange = (e, value) => {
+    debug('handleChange()', value)
+    _.invoke(this.props, 'onChange', e, { ...this.props, value })
+  }
+
   onDrag = (e, d) => {
     const { ogLowerVal, ogUpperVal } = this.state
     const { lastX } = d
     const { classList } = d.node
     const val = this.scalePxToVal(lastX)
+
+    debug('startDrag - px: ', lastX)
+    debug('startDrag - val: ', val)
 
     if (
       (classList.contains(UPPER_BOUND) && val < ogLowerVal) ||
@@ -195,11 +209,10 @@ export default class Slider extends Component {
   scalePxToPct = (px) => {
     if (!this.innerNode) throw Error('this is being called before DOM is mounted!')
 
-    const { precision } = this.props
     const { width } = this.innerNode.getClientRects()[0]
     const boundPx = constrainNum(px, 0, width)
 
-    return precisionRound(1000 * boundPx / width, precision)
+    return Math.round(1000 * boundPx / width) / 10
   }
 
   scalePxToVal = (px) => {
@@ -246,6 +259,7 @@ export default class Slider extends Component {
 
     const lowerHandleLeft = `calc(${lowerPct} - calc(${handleSize} / 2))`
     const upperHandleLeft = `calc(${upperPct} - calc(${handleSize} / 2))`
+
     const classes = cx(
       'ui',
       useKeyOnly(disabled, 'disabled'),
@@ -306,10 +320,10 @@ export default class Slider extends Component {
         }}
         className='inner'
       >
-        {track}
-        {trackFill}
-        {lowerHandle}
-        {upperHandle}
+        {track()}
+        {trackFill()}
+        {lowerHandle()}
+        {upperHandle()}
       </div>
     )
 
@@ -322,7 +336,7 @@ export default class Slider extends Component {
         onMouseDown={this.handleMouseDown}
         {...htmlInputProps}
       >
-        {inner}
+        {inner()}
         {/*
          Heads Up!
          Do not remove empty labels, they are required by SUI CSS
